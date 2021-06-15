@@ -1,0 +1,168 @@
+[
+  { "g":"0002",
+    "e":"0000",
+    "name": "FileMetaInformationGroupLength",
+    "vr": "UL",
+    "value": "",
+    "type": "Sepcial"
+  },
+  {
+    "g":"0002",
+    "e":"0001",
+    "name": "FileMetaInformationVersion",
+    "vr": "OB",
+    "value": "",
+    "type": "Sepcial"
+  },
+  {
+    "g":"0002",
+    "e":"0002",
+    "name": "MediaStorageSOPClassUID",
+    "vr": "UI",
+    "value": "1.2.840.10008.5.1.4.1.1.2",
+    "type": "Replace"
+  },
+  {
+    "g":"0002",
+    "e":"0003",
+    "name": "MediaStorageSOPInstanceUID",
+    "vr": "UI",
+    "value": "1.3.20210613.0001.0070",
+    "type": "Replace"
+  },
+  {
+    "g":"0002",
+    "e":"0010",
+    "name": "TransferSyntaxUID",
+    "vr": "UI",
+    "value": "1.2.840.10008.1.2.1",
+    "type": "Replace"
+  },
+  { "g":"0002",
+    "e":"0012",
+    "name": "ImplementationClassUID",
+    "vr": "UI",
+    "value": "1.2.840.113820.40",
+    "type": "Replace"
+  }, 
+  { "g":"0008",
+    "e":"0016",
+    "name": "SOPClassUID",
+    "vr": "UI",
+    "value": "",
+    "type": "Keep"
+  },
+  { "g":"0008",
+    "e":"0018",
+    "name": "SOPInstanceUID",
+    "vr": "UI",
+    "value": "1.3.20210613.0001.0070",
+    "type": "Replace"
+   },
+  {
+    "g":"0008",
+    "e":"0020",
+    "name": "StudyDate",
+    "vr": "DA",
+    "value": "",
+    "type": "ZeroLength"
+   },
+  { "g":"0008",
+    "e":"0030",
+    "name": "StudyTime",
+    "vr": "TM",
+    "value": "",
+    "type": "ZeroLength"
+  },
+  { "g":"0008",
+    "e":"0050",
+    "name": "AccessionNumber",
+    "vr": "SH",
+    "value": "",
+    "type": "Keep"
+  },
+  { "g":"0008",
+    "e":"0060",
+    "name": "Modality",
+    "value": "",
+    "type": "Keep"
+  }, 
+  { "g":"0008",
+    "e":"0070",
+    "name": "Manufacturer",
+    "vr": "LO",
+    "value": "",
+    "type": "ZeroLength"
+  },
+  { "g":"0008",
+    "e":"0090",
+    "name": "ReferringPhysicianName",
+    "vr": "PN",
+    "value": "",
+    "type": "Replace"
+  },
+  { "g":"0010",
+    "e":"0010",
+    "name": "PatientName",
+    "vr": "PN",
+    "value": "anonymous",
+    "type": "Replace"
+  },
+  { "g":"0010",
+    "e":"0020",
+    "name": "PatientID",
+    "vr": "LO",
+    "value": "12345678",
+    "type": "Replace"
+  },
+  { "g":"0010",
+    "e":"0030",
+    "name": "BirthDate",
+    "vr": "DA",
+    "value": "20000101",
+    "type": "Replace"
+  },
+  { "g":"0010",
+    "e":"0040",
+    "name": "PatientsSex",
+    "vr": "CA",
+    "value": "M",
+    "type": "Keep"
+  },
+  { "g":"0020",
+    "e":"0010",
+    "name": "StudyID",
+    "vr": "SH",
+    "value": "",
+    "type": "Replace"
+  },
+  { "g":"0020",
+    "e":"0011",
+    "name": "SeriesNumber",
+    "vr": "IS",
+    "value": "",
+    "type": "Replace"
+  },
+  { "g":"0020",
+    "e":"0013",
+    "name": "AcquisitionNumber",
+    "vr": "IS",
+    "value": "",
+    "type": "Keep"
+  },
+  { "g":"0020",
+    "e":"000D",
+    "name": "StudyInstanceUID",
+    "vr": "UI",
+    "value": "1.2.20210613.10",
+    "type": "Replace"
+  },
+  { "g":"0020",
+    "e":"000E",
+    "name": "SeriesInstanceUID",
+    "vr": "UI",
+    "value": "1.3.20210613.0002",
+    "type": "Replace"
+  }
+ 
+]
