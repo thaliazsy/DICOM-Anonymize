@@ -205,34 +205,34 @@ void MainWindow::on_selectBtn_clicked()
             // retDCM 為匿名的 DICOM 檔，或可放在目前目錄的子目錄，如 D:\\ttt\\did\mo.dcm
             //char* retDCM = (filename+"-anon.dcm").toUtf8().data();   //"D:\\ttt\\IM-0001-0070-anon.dcm";
 
+            //START: create a DICOM object, define the file path for input and output
             DICOMDataObject DDO;
             DDO.jsonTemp = & myDICOMJson;
             DDO.srcDCM = srcDCM;
             DDO.retXML = retXML;
             DDO.tempPart10Elements = tempPart10Elements;
             DDO.retDCM = retDCM;
+            //END: create a DICOM object
 
             DDO.ReadDICOMPart10File(); //decode header
-            DDO.DecodeRetToXML(retXML);
+            DDO.DecodeRetToXML(retXML); //output to XML
 
             //START: anonymize
-            DDO.SetJSONElement();
-            DDO.SaveDICOM();    //save dicom and create a new DDO for
+            DDO.SetJSONElement();   //replace original data with anonymized data
+            DDO.SaveDICOM();    //output anonymized dicom file
             //END: anonymize
 
-            DICOMDataObject anonDDO;
-            anonDDO.srcDCM = retDCM;
-            anonDDO.ReadDICOMPart10File();
-
+            DICOMDataObject anonDDO;    //create new DDO for anonymized image
+            anonDDO.srcDCM = retDCM;    //get anonymized image file
+            anonDDO.ReadDICOMPart10File();  //read metadata
             anonDDO.SetUsefulElements();
-            iSty.addToStudy(&(anonDDO.ufElements), dirPath);
+            iSty.addToStudy(&(anonDDO.ufElements), dirPath);    //add to imaging study
         }
         ui -> textEdit_result -> append(iSty.json);
         ui -> textEdit_result -> append("\n\n");
     }
     ui -> progressBar -> reset();
 }
-
 
 void MainWindow::on_uploadOrthancBtn_clicked()
 {
