@@ -947,11 +947,11 @@ void  DICOMDataObject::SaveDataElement(FILE	*Retfp, unsigned short g, unsigned s
     fwrite (EPtr, 2, 1, Retfp);
     // only support explict VR
     fwrite (VRPtr, 2, 1, Retfp);
-    int isLengthEven;
-    isLengthEven = Length % 2;
-    if(isLengthEven == 1) Length++;
+    int isLengthOdd;
+    isLengthOdd = Length % 2;
+    if(isLengthOdd == 1) Length++;
     if(strcmp(vr, "OB") == 0 || strcmp(vr, "OW") == 0 || strcmp(vr, "OF") ==0|| strcmp(vr, "SQ")==0  || strcmp(vr, "UT")==0 || strcmp(vr, "UN")==0)
-      { char tempData[3];
+    { char tempData[3];
         void * vTempData;
         tempData[0]= 0;tempData[1]= 0;tempData[2]= 0;
         vTempData = (void *) tempData;
@@ -959,19 +959,21 @@ void  DICOMDataObject::SaveDataElement(FILE	*Retfp, unsigned short g, unsigned s
         LengthPtr =(void *)(&Length);
         fwrite(LengthPtr, 4, 1, Retfp);
 
-      }
+    }
     else
-      { unsigned short shortLength;
+    { unsigned short shortLength;
         shortLength = Length; // 4 byte int to 2 byte int
         LengthPtr =(void *)(&shortLength);
         fwrite(LengthPtr, 2, 1, Retfp);
-      }
+    }
 
 
-    if(isLengthEven == 1) {
+    if(isLengthOdd == 1) {
         fwrite (Data ,Length-1, 1, Retfp);
         char pad[1];
-        pad[0]=0;
+        // http://dicom.nema.org/dicom/2013/output/chtml/part05/sect_6.2.html
+        if(strcmp(vr, "OB") == 0 || strcmp(vr, "UI") == 0)     pad[0]=0;
+        else   pad[0]=0;
         fwrite(pad, 1, 1, Retfp);
     }
     else fwrite (Data ,Length, 1, Retfp);

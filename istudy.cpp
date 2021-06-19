@@ -6,17 +6,6 @@ iStudy::iStudy()
 
 void iStudy::addToStudy(usefulElements * uElements, QString retJSONpath)
 {
-    //QString patientID;
-    //QString patientName;  X
-    //QString studyUID;
-    //QString seriesUID;
-    //QString seriesNumber;
-    //QString modality;
-    //QString numberOfInstances;
-    //QString instanceUID;
-    //QString sopClassUID;
-    //QString instanceNumber;
-
     //START: create series
     int seriesExist = -1;
 
