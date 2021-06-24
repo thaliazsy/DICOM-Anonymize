@@ -101,7 +101,7 @@ void MainWindow::finished(QNetworkReply * reply)
     if (error.error == QJsonParseError::NoError && json.isObject()) {
         ui -> textEdit_result -> append(json.toJson());
         ui -> textEdit_result -> append("\n\n");
-        if (type == "instances") {
+        if (type == "studies") {
             QString ID = json.object().value("ID").toString();
             ui -> textEdit -> append(ID);
 
@@ -241,12 +241,16 @@ void MainWindow::on_uploadOrthancBtn_clicked()
     ui -> uploadFHIRBtn -> setEnabled(false);
 
     foreach(QString fileName, fileNames) {
-        QFile f(fileName);
+        QFileInfo file (fileName);
+        QString dirPath = file.path();
+        QString filename = file.completeBaseName();
+        QFile f(dirPath + '/'+filename+"-anon.dcm");
         if (f.open(QFile::ReadOnly)) {
             QByteArray data = f.readAll();
 
             qDebug("Upload to DICOM server start\n");
 
+            //QUrl url(ui -> dicomEdit -> text() + "/servers/faith/stow");
             QUrl url(ui -> dicomEdit -> text() + "/instances");
 
             QNetworkRequest request(url);
