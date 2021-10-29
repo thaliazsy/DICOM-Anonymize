@@ -23,8 +23,8 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     connect(&this->m_manager, &QNetworkAccessManager::finished, this, &MainWindow::finished);
-    fileCount=0;
-    uploadedFilesCount=0;
+    DICOMCount=0;
+    uploadedDICOMCount=0;
     progressValue=0;
     ui->progressBar->setRange(0, 100);
     bool normal = LoadDictionary("dd.txt");   // DICOM tags and VR dictionary
@@ -99,12 +99,19 @@ void MainWindow::finished(QNetworkReply * reply)
     QJsonParseError error;
     QJsonDocument json = QJsonDocument::fromJson(result.toUtf8(), & error);
     if (error.error == QJsonParseError::NoError && json.isObject()) {
-        ui -> textEdit_result -> append(json.toJson());
-        ui -> textEdit_result -> append("\n\n");
-        if (type == "studies") {
+        //ui -> textEdit_result -> append(json.toJson());
+        //ui -> textEdit_result -> append("\n\n");
+        if (type == "instances") {
             QString ID = json.object().value("ID").toString();
-            ui -> textEdit -> append(ID);
-
+            ui -> textEdit -> append(result);
+            uploadedDICOMCount++;
+            if (uploadedDICOMCount == DICOMCount) {
+                //https://faithorthanc.ddns.net/app/explorer.html#study?uuid=e2d056dc-726cf0a2-4f15e5b7-2d3e844a-746c5028
+                QString studyID = json.object().value("ParentStudy").toString();
+                //ui->textEdit_result -> append("DICOM image Orthanc URL:");
+                //ui -> textEdit_result -> append("https://faithorthanc.ddns.net/app/explorer.html#study?" + studyID + "\n");
+                ui->uploadFHIRBtn->setEnabled(true);
+            }
             //              QNetworkRequest request(url+"/"+ID+"/simplified-tags");
             //              request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
             //              this->m_manager.get(request);
@@ -112,9 +119,9 @@ void MainWindow::finished(QNetworkReply * reply)
         } else if (type == "simplified-tags") {
             //generate imaging study
             getMetadata(json);
-            uploadedFilesCount++;
+            uploadedDICOMCount++;
 
-            if (uploadedFilesCount == fileCount) {
+            if (uploadedDICOMCount == DICOMCount) {
                 //create ImagingStudy & Patient JSON
                 QMap < QString, ImagingStudy > ::iterator i;
                 for (i = studies.begin(); i != studies.end(); i++) {
@@ -130,9 +137,12 @@ void MainWindow::finished(QNetworkReply * reply)
             }
             ui -> progressBar -> setValue(ui -> progressBar -> value() + progressValue);
         } else {
-            QString id = json.object().value("id").toString();
-            ui->istudyEdit->setText(url+id);
-            ui -> progressBar -> setValue(100);
+            ui->textEdit_result->append(result);
+//            QString id = json.object().value("id").toString();
+//            ui->textEdit_result->append("FHIR ImagingStudy URL:");
+//            ui->textEdit_result->append(url+id+"\n");
+//            ui->istudyEdit->setText(url+id);
+//            ui -> progressBar -> setValue(100);
         }
 
     }
@@ -141,6 +151,7 @@ void MainWindow::finished(QNetworkReply * reply)
 
 void MainWindow::on_selectBtn_clicked()
 {
+    uploadedDICOMCount=0;
     QString jsonTemp;
     jsonTemp = "map.json"; //與 dd.txt 一樣，需存放在程式編譯結果目錄 (exe的上一層)
     dicomJSONTemp myDICOMJson;
@@ -160,7 +171,7 @@ void MainWindow::on_selectBtn_clicked()
     if (fileNames.length() > 0) {
         ui -> uploadOrthancBtn -> setEnabled(true);
 
-        fileCount = fileNames.length();
+        DICOMCount = fileNames.length();
 
         //START: display file names
         QString files = "";
@@ -173,16 +184,15 @@ void MainWindow::on_selectBtn_clicked()
         //START: get destination folder path
         QFileInfo f(fileNames[0]);
         dirPath = f.path();
-        ui -> textEdit -> append(dirPath);
         //END: get destination folder path
 
         //START: create ImagingStudy
         iSty.patientID ="2171";
         iSty.patientName ="anonymous";
-        iSty.endpoint ="FaithOrthanc";
+        iSty.endpoint = ui->dicomEdit->text();
         //END: create ImagingStudy
 
-        for (int i=0; i<fileCount; i++) {
+        for (int i=0; i<DICOMCount; i++) {
             QFileInfo f(fileNames[i]);
             QString filename = f.completeBaseName();
 
@@ -217,8 +227,12 @@ void MainWindow::on_selectBtn_clicked()
             DDO.ReadDICOMPart10File(); //decode header
             DDO.DecodeRetToXML(retXML); //output to XML
 
+
+
             //START: anonymize
-            DDO.SetJSONElement();   //replace original data with anonymized data
+            DDO.SetUsefulElements();
+            //uidMap = DDO.SetJSONElement(uidMap);   //replace original data with anonymized data
+            uidMap = DDO.SetJSONElement(uidMap);
             DDO.SaveDICOM();    //output anonymized dicom file
             //END: anonymize
 
@@ -226,10 +240,14 @@ void MainWindow::on_selectBtn_clicked()
             anonDDO.srcDCM = retDCM;    //get anonymized image file
             anonDDO.ReadDICOMPart10File();  //read metadata
             anonDDO.SetUsefulElements();
-            iSty.addToStudy(&(anonDDO.ufElements), dirPath);    //add to imaging study
+            QString istudyFile = iSty.addToStudy(&(anonDDO.ufElements), dirPath);    //add to imaging studys
+            ui->istudyEdit->setText(istudyFile);
         }
-        ui -> textEdit_result -> append(iSty.json);
-        ui -> textEdit_result -> append("\n\n");
+        //QString endpointfile = iSty.createEndpointJSON(dirPath);
+        QString ed = iSty.createEndpointJSON(dirPath);
+        ui->endpointEdit->setText(ed);
+
+        ui -> textEdit -> append(iSty.json + "\n\n");
     }
     ui -> progressBar -> reset();
 }
@@ -268,6 +286,37 @@ void MainWindow::on_uploadFHIRBtn_clicked()
     ui -> uploadOrthancBtn -> setEnabled(false);
     ui -> uploadFHIRBtn -> setEnabled(false);
 
+    QFile endpoint(ui->endpointEdit->text());
+    QFile istudy(ui->istudyEdit->text());
+
+    if (endpoint.open(QFile::ReadOnly)) {
+        QByteArray data = endpoint.readAll();
+        QJsonDocument doc = QJsonDocument::fromJson(data);
+        QJsonObject obj;
+
+        //check doc
+        if(!doc.isNull()) {
+            obj = doc.object();
+            QString resourceType = obj.value("resourceType").toString();
+            QString id = obj.value("id").toString();    //return "" if no id inside JSON
+            uploadToFHIR(resourceType, id, data);
+
+            if (istudy.open(QFile::ReadOnly)) {
+                QByteArray data = istudy.readAll();
+                QJsonDocument doc = QJsonDocument::fromJson(data);
+                QJsonObject obj;
+
+                //check doc
+                if(!doc.isNull()) {
+                    obj = doc.object();
+                    QString resourceType = obj.value("resourceType").toString();
+                    QString id = obj.value("id").toString();    //return "" if no id inside JSON
+                    uploadToFHIR(resourceType, id, data);
+                }
+            }
+        }
+    }
+
     //START: upload json (from left textEdit) to fhir server
    /* QByteArray data = ui->textEdit->toPlainText().toUtf8();
     QJsonDocument doc = QJsonDocument::fromJson(data);
@@ -282,7 +331,7 @@ void MainWindow::on_uploadFHIRBtn_clicked()
     }*/
     //END: upload json (from left textEdit) to fhir server
 
-    uploadToFHIR("ImagingStudy", "", iSty.json);
+    //uploadToFHIR("ImagingStudy", "", iSty.json);
 }
 
 void MainWindow::uploadToFHIR(QString resourceType, QString id, const QByteArray data)

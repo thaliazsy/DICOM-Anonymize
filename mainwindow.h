@@ -35,11 +35,12 @@ private:
     QNetworkAccessManager m_manager;
     QStringList fileNames;
     QString dirPath;
-    int fileCount;
-    int uploadedFilesCount;
+    int DICOMCount;
+    int uploadedDICOMCount;
     int progressValue;
     QMap<QString, ImagingStudy> studies;
     DICOMDataObject DDO;
     iStudy iSty;
+    QMap<QString, QString> uidMap;
 };
 #endif // MAINWINDOW_H

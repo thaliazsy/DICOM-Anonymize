@@ -4,7 +4,7 @@ iStudy::iStudy()
 {
 }
 
-void iStudy::addToStudy(usefulElements * uElements, QString retJSONpath)
+QString iStudy::addToStudy(usefulElements * uElements, QString retJSONpath)
 {
     //START: create series
     int seriesExist = -1;
@@ -31,7 +31,7 @@ void iStudy::addToStudy(usefulElements * uElements, QString retJSONpath)
         //create new series
         seriesObj = QJsonObject();
         seriesObj.insert("uid", uElements->seriesUID);
-        seriesObj.insert("number", uElements->seriesNumber);
+        seriesObj.insert("number", uElements->seriesNumber.toInt());
         seriesObj.insert("modality", uElements->modality);
         seriesObj.insert("numberOfInstances", uElements->numberOfInstances);
         //seriesObj.insert("endpoint")
@@ -57,10 +57,11 @@ void iStudy::addToStudy(usefulElements * uElements, QString retJSONpath)
         identifier.append(idenObj);
         QJsonObject subject;
         subject.insert("reference", "Patient/" + patientID);
+        studyUID=uElements->studyUID;
 
         QJsonArray endpointArr;
         QJsonObject addressObj;
-        addressObj.insert("reference", "Endpoint/" +endpoint);
+        addressObj.insert("reference", "Endpoint/" + uElements->studyUID);
         endpointArr.append(addressObj);
         obj.insert("endpoint", endpointArr);
 
@@ -73,16 +74,16 @@ void iStudy::addToStudy(usefulElements * uElements, QString retJSONpath)
     QJsonDocument doc(obj);
     json=doc.toJson();
 
+    QString returnFile = retJSONpath + "/ImagingStudy-"+uElements->studyUID+".json";
 
-
-    QFile tempJSON(retJSONpath + "/ImagingStudy-"+uElements->studyUID+".json");
+    QFile tempJSON(returnFile);
     if(tempJSON.open(QIODevice::WriteOnly))
     {
         tempJSON.write(json);
         tempJSON.close();
     }
 
- //   return json;
+    return returnFile;
 
 
   /*   int i,TotalElement;
@@ -118,8 +119,42 @@ QJsonObject iStudy::addNewInstance(usefulElements * uElements)
     QJsonObject obj;
     obj.insert("uid", uElements->instanceUID);
     obj.insert("sopClass", uElements->sopClassUID);
-    obj.insert("number", uElements->instanceNumber);
+    obj.insert("number", uElements->instanceNumber.toInt());
     return obj;
+}
+
+QString iStudy::createEndpointJSON(QString retJSONpath)
+{
+    QJsonObject obj;
+
+    obj.insert("resourceType", "Endpoint");
+    obj.insert("id", studyUID);
+
+    QJsonArray payloadArr;
+    QJsonObject textObj;
+    textObj.insert("text", "DICOM");
+    payloadArr.append(textObj);
+    obj.insert("payloadType", payloadArr);
+
+    QJsonArray payloadMimeArr;
+    payloadMimeArr.append("application/dicom");
+    obj.insert("payloadMimeType", payloadMimeArr);
+
+    obj.insert("address", endpoint+"/dicom-web/studies/"+ studyUID);
+
+
+    QJsonDocument doc(obj);
+    json=doc.toJson();
+
+    QString returnFile = retJSONpath + "/Endpoint-"+ studyUID+".json";
+
+    QFile tempJSON(returnFile);
+    if(tempJSON.open(QIODevice::WriteOnly))
+    {
+        tempJSON.write(json);
+        tempJSON.close();
+    }
+    return returnFile;
 }
 
 QByteArray iStudy::createImagingStudyJSON()

@@ -12,9 +12,10 @@ class iStudy
 {
 public:
     iStudy();
-    void addToStudy(usefulElements * uElements, QString retJSONpath); //20210612 add by Jack Hsiao
+    QString addToStudy(usefulElements * uElements, QString retJSONpath); //20210612 add by Jack Hsiao
     QJsonObject addNewInstance(usefulElements * uElements);
     QByteArray createImagingStudyJSON();
+    QString createEndpointJSON(QString retJSONpath);
 
     QJsonObject obj;
 
@@ -36,6 +37,7 @@ public:
     //QString status;
     QString patientID;
     QString patientName;
+    QString studyUID;
 
     /*
       "status": "available",

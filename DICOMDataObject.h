@@ -96,8 +96,10 @@ FILE	*fp;
 FILE	*Retfp;
 unsigned int		fileSize;
 QJsonObject FoundObj;
+unsigned int elIdx;
 bool FindJSONElement(QString g, QString e); //set found obj to FoundObj
-void SetJSONElement(); //QString g, QString e);
+QMap<QString, QString> SetJSONElement(QMap<QString, QString> uidMap); //QString g, QString e);
+void SetJSONElement();
 void SetUsefulElements();
 DICOMDataObject();
 dicomJSONTemp * jsonTemp;
