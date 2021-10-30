@@ -273,6 +273,7 @@ void MainWindow::on_uploadOrthancBtn_clicked()
 
             QNetworkRequest request(url);
             request.setHeader(QNetworkRequest::ContentTypeHeader, "application/dicom");
+            //request.setRawHeader("Authorization", "Bearer 9204aeb9-d1cb-4511-8641-1f2c964f7c6a");
             m_manager.post(request, data);
         }
     }
@@ -341,6 +342,7 @@ void MainWindow::uploadToFHIR(QString resourceType, QString id, const QByteArray
     QUrl url(ui -> fhirEdit -> text() + "/" + resourceType + "/" + id);
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json+fhir");
+    //request.setRawHeader("Authorization", "Bearer 87944918-1f86-418e-8418-398e2e4ddee6");
     if (id.trimmed() == "") {
         this -> m_manager.post(request, data);
     } else {
