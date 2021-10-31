@@ -36,6 +36,7 @@ private:
     QString dirPath;
     int DICOMCount;
     int uploadedDICOMCount;
+    int uploadDICOMsuccess;
     int progressValue;
     DICOMDataObject DDO;
     iStudy iSty;

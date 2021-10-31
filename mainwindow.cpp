@@ -25,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&this->m_manager, &QNetworkAccessManager::finished, this, &MainWindow::finished);
     DICOMCount=0;
     uploadedDICOMCount=0;
+    uploadDICOMsuccess = 0;
     progressValue=0;
     ui->progressBar->setRange(0, 100);
     bool normal = LoadDictionary("dd.txt");   // DICOM tags and VR dictionary
@@ -68,26 +69,54 @@ void MainWindow::finished(QNetworkReply * reply)
         //ui -> textEdit_result -> append(json.toJson());
         //ui -> textEdit_result -> append("\n\n");
         if (type == "instances") {
-            QString ID = json.object().value("ID").toString();
+            QString status = json.object().value("Status").toString();
             ui -> textEdit -> append(result);
             uploadedDICOMCount++;
-            if (uploadedDICOMCount == DICOMCount) {
-                //https://faithorthanc.ddns.net/app/explorer.html#study?uuid=e2d056dc-726cf0a2-4f15e5b7-2d3e844a-746c5028
-                //QString studyID = json.object().value("ParentStudy").toString();
-                //ui->textEdit_result -> append("DICOM image Orthanc URL:");
-                //ui -> textEdit_result -> append("https://faithorthanc.ddns.net/app/explorer.html#study?" + studyID + "\n");
-                ui->uploadFHIRBtn->setEnabled(true);
+            if(status=="Success") {
+                uploadDICOMsuccess++;
             }
-            //              QNetworkRequest request(url+"/"+ID+"/simplified-tags");
-            //              request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
-            //              this->m_manager.get(request);
+            if (uploadedDICOMCount == DICOMCount) {
+                if(uploadDICOMsuccess == uploadedDICOMCount) {  //all upload success
+                    ui->progressBar->setValue(100);
+                    ui->uploadFHIRBtn->setEnabled(true);
+                }
+                else {  //there is unsuccessful upload
+                    QMessageBox msgBox;
+                    msgBox.setText("Upload to DICOM server failed! Closing application...");
+                    msgBox.exec();
+                    QMetaObject::invokeMethod(this, "close", Qt::QueuedConnection);     //close app
+                }
+            }
             ui -> progressBar -> setValue(ui -> progressBar -> value() + progressValue);
         } else {
+            QString resourceType = json.object().value("resourceType").toString();
+
+            if(resourceType=="Endpoint") { //Endpoint upload success, proceed upload ImagingStudy
+                ui->progressBar->setValue(50);
+
+                QFile istudy(ui->istudyEdit->text());
+                if (istudy.open(QFile::ReadOnly)) {
+                    QByteArray data = istudy.readAll();
+                    QJsonDocument doc = QJsonDocument::fromJson(data);
+                    QJsonObject obj;
+
+                    //check doc
+                    if(!doc.isNull()) {
+                        obj = doc.object();
+                        QString resourceType = obj.value("resourceType").toString();
+                        QString id = obj.value("id").toString();    //return "" if no id inside JSON
+                        uploadToFHIR(resourceType, id, data);   //upload ImagingStudy
+                    }
+                }
+            }
+            else if(resourceType=="ImagingStudy") {
+                ui->progressBar->setValue(100);
+                ui->selectBtn->setEnabled(true);
+            }
             ui->textEdit_result->append(result);
         }
 
     }
-    ui->selectBtn->setEnabled(true);
 }
 
 void MainWindow::on_selectBtn_clicked()
@@ -225,9 +254,8 @@ void MainWindow::on_uploadFHIRBtn_clicked()
     ui -> uploadFHIRBtn -> setEnabled(false);
 
     QFile endpoint(ui->endpointEdit->text());
-    QFile istudy(ui->istudyEdit->text());
 
-    //START: upload Endpoint & ImagingStudy
+    //START: upload Endpoint (ImagingStudy upload in finished() function if Endpoint upload success
     if (endpoint.open(QFile::ReadOnly)) {
         QByteArray data = endpoint.readAll();
         QJsonDocument doc = QJsonDocument::fromJson(data);
@@ -240,19 +268,7 @@ void MainWindow::on_uploadFHIRBtn_clicked()
             QString id = obj.value("id").toString();    //return "" if no id inside JSON
             uploadToFHIR(resourceType, id, data);   //upload Endpoint
 
-            if (istudy.open(QFile::ReadOnly)) {
-                QByteArray data = istudy.readAll();
-                QJsonDocument doc = QJsonDocument::fromJson(data);
-                QJsonObject obj;
 
-                //check doc
-                if(!doc.isNull()) {
-                    obj = doc.object();
-                    QString resourceType = obj.value("resourceType").toString();
-                    QString id = obj.value("id").toString();    //return "" if no id inside JSON
-                    uploadToFHIR(resourceType, id, data);   //upload ImagingStudy
-                }
-            }
         }
     }
 }

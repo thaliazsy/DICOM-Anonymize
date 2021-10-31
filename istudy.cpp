@@ -69,6 +69,7 @@ QString iStudy::addToStudy(usefulElements * uElements, QString retJSONpath)
         obj.insert("identifier", identifier);
         obj.insert("status", "available");
         obj.insert("resourceType", "ImagingStudy");
+        obj.insert("id", uElements->studyUID);
     }
 
     QJsonDocument doc(obj);
