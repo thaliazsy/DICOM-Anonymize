@@ -28,7 +28,6 @@ private slots:
     void finished(QNetworkReply* reply);
     void uploadToFHIR(QString resourceType, QString id, const QByteArray data);
     void clearDir(const QString path);
-    void getMetadata(QJsonDocument json);
 
 private:
     Ui::MainWindow *ui;
@@ -38,7 +37,6 @@ private:
     int DICOMCount;
     int uploadedDICOMCount;
     int progressValue;
-    QMap<QString, ImagingStudy> studies;
     DICOMDataObject DDO;
     iStudy iSty;
     QMap<QString, QString> uidMap;

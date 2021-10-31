@@ -52,52 +52,6 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::getMetadata(QJsonDocument json)
-{
-    QMap < QString, QString > metadata;
-    QJsonObject data = json.object();
-
-    metadata.insert("SOPClassUID", data.value("SOPClassUID").toString());
-    metadata.insert("SOPInstanceUID", data.value("SOPInstanceUID").toString());
-
-    QString str = data.value("StudyDate").toString();
-    QString v1 = str.mid(0, 4);
-    QString v2 = str.mid(4, 2);
-    QString v3 = str.mid(6, 2);
-    QString ymd = v1 + "-" + v2 + "-" + v3;
-    metadata.insert("StudyDate", ymd);
-
-    str = data.value("StudyTime").toString();
-    v1 = str.mid(0, 2);
-    v2 = str.mid(2, 2);
-    v3 = str.mid(4, 2);
-    QString hms = v1 + ":" + v2 + ":" + v3;
-    metadata.insert("StudyTime", hms);
-
-    metadata.insert("Modality", data.value("Modality").toString());
-    metadata.insert("PatientID", data.value("PatientID").toString());
-    metadata.insert("PatientName", data.value("PatientName").toString());
-    metadata.insert("BodyPartExamined", data.value("BodyPartExamined").toString());
-    metadata.insert("StudyInstanceUID", data.value("StudyInstanceUID").toString());
-    metadata.insert("SeriesInstanceUID", data.value("SeriesInstanceUID").toString());
-    metadata.insert("SeriesNumber", data.value("SeriesNumber").toString());
-    metadata.insert("InstanceNumber", data.value("InstanceNumber").toString());
-
-    //create Study
-    QString key = metadata.value("StudyInstanceUID");
-    if (studies.contains(key)) {
-        studies[key].appendToStudy(metadata);
-        qDebug("append study");
-    } else {
-        ImagingStudy temp;
-        temp.createStudy(metadata);
-        studies.insert(metadata.value("StudyInstanceUID"), temp);
-        qDebug("create study");
-    }
-    //create Study end
-
-}
-
 void MainWindow::finished(QNetworkReply * reply)
 {
     QString url = reply -> url().toString();
@@ -125,26 +79,6 @@ void MainWindow::finished(QNetworkReply * reply)
             //              QNetworkRequest request(url+"/"+ID+"/simplified-tags");
             //              request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
             //              this->m_manager.get(request);
-            ui -> progressBar -> setValue(ui -> progressBar -> value() + progressValue);
-        } else if (type == "simplified-tags") {
-            //generate imaging study
-            getMetadata(json);
-            uploadedDICOMCount++;
-
-            if (uploadedDICOMCount == DICOMCount) {
-                //create ImagingStudy & Patient JSON
-                QMap < QString, ImagingStudy > ::iterator i;
-                for (i = studies.begin(); i != studies.end(); i++) {
-                    QByteArray json = i.value().createImagingStudyJSON();
-                    qDebug() << json << "\n\n";
-                    uploadToFHIR("ImagingStudy", "", json);
-
-                    json = i.value().createPatientJSON();
-                    qDebug() << json << "\n\n";
-                    uploadToFHIR("Patient", "TCUMI106." + i -> patientID, json);
-                }
-                ui -> selectBtn -> setEnabled(true);
-            }
             ui -> progressBar -> setValue(ui -> progressBar -> value() + progressValue);
         } else {
             ui->textEdit_result->append(result);
