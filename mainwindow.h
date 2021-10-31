@@ -42,5 +42,6 @@ private:
     DICOMDataObject DDO;
     iStudy iSty;
     QMap<QString, QString> uidMap;
+    dicomJSONTemp myDICOMJson;
 };
 #endif // MAINWINDOW_H

@@ -35,6 +35,16 @@ MainWindow::MainWindow(QWidget *parent)
         QMetaObject::invokeMethod(this, "close", Qt::QueuedConnection);     //close app
     }
 
+    QString jsonTemp = "map.json"; //與 dd.txt 一樣，需存放在程式編譯結果目錄 (exe的上一層)
+    if (myDICOMJson.loadFile(jsonTemp) == true) {
+        qDebug() << myDICOMJson.getJSONData("0002", "0001", "type");
+    } else {
+        qDebug() << "load DICOM JSON error";
+        QMessageBox msgBox;
+        msgBox.setText("map.json load failed! Closing application...");
+        msgBox.exec();
+        QMetaObject::invokeMethod(this, "close", Qt::QueuedConnection);     //close app
+    }
 }
 
 MainWindow::~MainWindow()
@@ -152,14 +162,6 @@ void MainWindow::finished(QNetworkReply * reply)
 void MainWindow::on_selectBtn_clicked()
 {
     uploadedDICOMCount=0;
-    QString jsonTemp;
-    jsonTemp = "map.json"; //與 dd.txt 一樣，需存放在程式編譯結果目錄 (exe的上一層)
-    dicomJSONTemp myDICOMJson;
-    if (myDICOMJson.loadFile(jsonTemp) == true) {
-        qDebug() << myDICOMJson.getJSONData("0002", "0001", "type");
-    } else {
-        qDebug() << "load DICOM JSON error";
-    }
 
     // 基於指定的目錄，針對每一個 DICOM，迴圈重複跑以下程式。以產生匿名 DICOM 檔及 imagingStudies
     QFileDialog dialog(this);
