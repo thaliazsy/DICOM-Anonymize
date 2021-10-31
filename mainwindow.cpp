@@ -28,23 +28,25 @@ MainWindow::MainWindow(QWidget *parent)
     progressValue=0;
     ui->progressBar->setRange(0, 100);
     bool normal = LoadDictionary("dd.txt");   // DICOM tags and VR dictionary
-    if(!normal){
+    if(normal){
+        QString jsonTemp = "map.json"; //與 dd.txt 一樣，需存放在程式編譯結果目錄 (exe的上一層)
+        if (myDICOMJson.loadFile(jsonTemp) == true) {
+            qDebug() << myDICOMJson.getJSONData("0002", "0001", "type");
+        } else {
+            qDebug() << "load DICOM JSON error";
+            QMessageBox msgBox;
+            msgBox.setText("map.json load failed! Closing application...");
+            msgBox.exec();
+            QMetaObject::invokeMethod(this, "close", Qt::QueuedConnection);     //close app
+        }
+    }
+    else {
         QMessageBox msgBox;
         msgBox.setText("Dictionary load failed! Closing application...");
         msgBox.exec();
         QMetaObject::invokeMethod(this, "close", Qt::QueuedConnection);     //close app
     }
 
-    QString jsonTemp = "map.json"; //與 dd.txt 一樣，需存放在程式編譯結果目錄 (exe的上一層)
-    if (myDICOMJson.loadFile(jsonTemp) == true) {
-        qDebug() << myDICOMJson.getJSONData("0002", "0001", "type");
-    } else {
-        qDebug() << "load DICOM JSON error";
-        QMessageBox msgBox;
-        msgBox.setText("map.json load failed! Closing application...");
-        msgBox.exec();
-        QMetaObject::invokeMethod(this, "close", Qt::QueuedConnection);     //close app
-    }
 }
 
 MainWindow::~MainWindow()
@@ -71,7 +73,7 @@ void MainWindow::finished(QNetworkReply * reply)
             uploadedDICOMCount++;
             if (uploadedDICOMCount == DICOMCount) {
                 //https://faithorthanc.ddns.net/app/explorer.html#study?uuid=e2d056dc-726cf0a2-4f15e5b7-2d3e844a-746c5028
-                QString studyID = json.object().value("ParentStudy").toString();
+                //QString studyID = json.object().value("ParentStudy").toString();
                 //ui->textEdit_result -> append("DICOM image Orthanc URL:");
                 //ui -> textEdit_result -> append("https://faithorthanc.ddns.net/app/explorer.html#study?" + studyID + "\n");
                 ui->uploadFHIRBtn->setEnabled(true);
@@ -82,11 +84,6 @@ void MainWindow::finished(QNetworkReply * reply)
             ui -> progressBar -> setValue(ui -> progressBar -> value() + progressValue);
         } else {
             ui->textEdit_result->append(result);
-//            QString id = json.object().value("id").toString();
-//            ui->textEdit_result->append("FHIR ImagingStudy URL:");
-//            ui->textEdit_result->append(url+id+"\n");
-//            ui->istudyEdit->setText(url+id);
-//            ui -> progressBar -> setValue(100);
         }
 
     }
@@ -230,6 +227,7 @@ void MainWindow::on_uploadFHIRBtn_clicked()
     QFile endpoint(ui->endpointEdit->text());
     QFile istudy(ui->istudyEdit->text());
 
+    //START: upload Endpoint & ImagingStudy
     if (endpoint.open(QFile::ReadOnly)) {
         QByteArray data = endpoint.readAll();
         QJsonDocument doc = QJsonDocument::fromJson(data);
@@ -240,7 +238,7 @@ void MainWindow::on_uploadFHIRBtn_clicked()
             obj = doc.object();
             QString resourceType = obj.value("resourceType").toString();
             QString id = obj.value("id").toString();    //return "" if no id inside JSON
-            uploadToFHIR(resourceType, id, data);
+            uploadToFHIR(resourceType, id, data);   //upload Endpoint
 
             if (istudy.open(QFile::ReadOnly)) {
                 QByteArray data = istudy.readAll();
@@ -252,27 +250,11 @@ void MainWindow::on_uploadFHIRBtn_clicked()
                     obj = doc.object();
                     QString resourceType = obj.value("resourceType").toString();
                     QString id = obj.value("id").toString();    //return "" if no id inside JSON
-                    uploadToFHIR(resourceType, id, data);
+                    uploadToFHIR(resourceType, id, data);   //upload ImagingStudy
                 }
             }
         }
     }
-
-    //START: upload json (from left textEdit) to fhir server
-   /* QByteArray data = ui->textEdit->toPlainText().toUtf8();
-    QJsonDocument doc = QJsonDocument::fromJson(data);
-    QJsonObject obj;
-
-        //check doc
-    if(!doc.isNull()) {
-        obj = doc.object();
-        QString resourceType = obj.value("resourceType").toString();
-        QString id = obj.value("id").toString();    //return "" if no id inside JSON
-        uploadToFHIR(resourceType, id, data);
-    }*/
-    //END: upload json (from left textEdit) to fhir server
-
-    //uploadToFHIR("ImagingStudy", "", iSty.json);
 }
 
 void MainWindow::uploadToFHIR(QString resourceType, QString id, const QByteArray data)

@@ -614,7 +614,8 @@ int  DICOMDataObject::	DecodeDICOMObject(DICOMObjectIndex MyObjectIndex)
            CurElement.ElementID = AllElement.size();
            LastElementID = CurElement.ElementID;
            AllElement.push_back(CurElement);
-           printf("G = %04X E = %04X  %s VR = %s  Length = %d Offset= %d strData= %s \n", CurElement.Group,  CurElement.Element,CurElement.Description, CurElement.VRType, CurElement.Length, CurElement.Offset, CurElement.StrDataV[0].strData);
+           printf("=======================================================\n");
+           printf("G = %04X E = %04X  %s VR = %s  Length = %d Offset= %d strData= %s \n", CurElement.Group,  CurElement.Element, CurElement.Description, CurElement.VRType, CurElement.Length, CurElement.Offset, CurElement.StrDataV[0].strData);
           // printf("G = %04X E = %04X VR = %s  Length = %d Offset= %d str Data %s \n", CurElement.Group,  CurElement.Element, CurElement.VRType, CurElement.Length, CurElement.Offset, CurElement.strData);
           //  printf("Next offset %d  ",Offset);
          }
@@ -893,95 +894,6 @@ void DICOMDataObject::SetUsefulElements()
 
 
 }
-
-//QMap<QString, QString> DICOMDataObject::SetJSONElement(QMap<QString, QString> uidMap)
-//{
-//    QString strG,strE, strVR, strValue,strType;
-//    int  i, size;
-//    size = jsonTemp->rootJsonAarray.size();
-//    QJsonArray newArray;
-//    //  qDebug()<< size;
-
-//    //generate current datetime for UID replacement
-//    QDateTime now = now.currentDateTime();
-//    QString dateTime = now.toString("yyyyMMddHHmmss");
-
-//    for(i=0; i<size ;i++)
-//    {
-//        strG =jsonTemp->rootJsonAarray.at(i).toObject().value("g").toString();
-//        strE =jsonTemp->rootJsonAarray.at(i).toObject().value("e").toString();
-//        if(strG=="0002" && strE=="0003")    //MediaStorageSOPInstanceUID
-//        {
-//            QJsonValueRef ref = jsonTemp->rootJsonAarray[i];
-//            QJsonObject o = ref.toObject();
-//            QString val = o.value("value").toString();
-//            if(uidMap.contains(val)){
-//                o.insert("value", QString("1.3." + uidMap[val] + "." + ufElements.instanceNumber));
-//            }
-//            else {
-//                QString str = "1.3." + dateTime + "." + ufElements.instanceNumber;
-//                o.insert("value", str);
-//                uidMap[val] = str;
-//            }
-//            newArray.push_back(o);
-//        }
-//        else if(strG=="0008" && strE=="0018")    //SOPInstanceUID
-//        {
-//            QJsonValueRef ref = jsonTemp->rootJsonAarray[i];
-//            QJsonObject o = ref.toObject();
-//            QString val = o.value("value").toString();
-//            if(uidMap.contains(val)){
-//                o.insert("value", QString("1.3." + dateTime + "." + ufElements.instanceNumber));
-//            }
-//            else {
-//                QString str = "1.3." + dateTime + "." + ufElements.instanceNumber;
-//                o.insert("value", str);
-//                uidMap[val] = str;
-//            }
-//            newArray.push_back(o);
-//        }
-//        else if(strG=="0020" && strE=="000D")    //StudyInstanceUID
-//        {
-//            QJsonValueRef ref = jsonTemp->rootJsonAarray[i];
-//            QJsonObject o = ref.toObject();
-//            QString val = o.value("value").toString();
-//            if(uidMap.contains(val)){
-//                o.insert("value", QString("1.1." + dateTime + ".0001"));
-//            }
-//            else {
-//                QString str = "1.1." + dateTime + ".0001";
-//                o.insert("value", str);
-//                uidMap[val] = str;
-//            }
-//            newArray.push_back(o);
-//        }
-//        else if(strG=="0020" && strE=="000E")    //SeriesInstanceUID
-//        {
-//            QJsonValueRef ref = jsonTemp->rootJsonAarray[i];
-//            QJsonObject o = ref.toObject();
-//            QString val = o.value("value").toString();
-//            if(uidMap.contains(val)){
-//                o.insert("value", QString("1.2." + dateTime + "." + ufElements.seriesNumber));
-//            }
-//            else {
-//                QString str = "1.2." + dateTime + "." + ufElements.seriesNumber;
-//                o.insert("value", str);
-//                uidMap[val] = str;
-//            }
-//            newArray.push_back(o);
-//        }
-//        else
-//        {
-//            newArray.push_back(jsonTemp->rootJsonAarray.at(i));
-//        }
-
-//    }
-//    jsonTemp->rootJsonAarray = newArray;
-//    QJsonDocument doc(newArray);
-//    qDebug()<< "start============================================";
-//    qDebug()<< doc.toJson();
-//    return uidMap;
-//}
 
 //void DICOMDataObject::SetJSONElement()
 QMap<QString, QString> DICOMDataObject::SetJSONElement(QMap<QString, QString> uidMap)

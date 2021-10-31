@@ -4,7 +4,7 @@
     "name": "FileMetaInformationGroupLength",
     "vr": "UL",
     "value": "",
-    "type": "Sepcial"
+    "type": "Special"
   },
   {
     "g":"0002",
@@ -12,7 +12,7 @@
     "name": "FileMetaInformationVersion",
     "vr": "OB",
     "value": "",
-    "type": "Sepcial"
+    "type": "Special"
   },
   {
     "g":"0002",
