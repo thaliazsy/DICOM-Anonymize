@@ -85,7 +85,7 @@ static	unsigned int HexToNnmber(char	ch)
     ret = strGEtoInt("0000","0010"); // 16
      */
 unsigned int strGEtoInt(char *Gstr , char * Estr)
-{unsigned int  intGE ,intGEret,intNumber;
+{unsigned int intGE, intNumber;
  intGE =0;
         char	*cPtr;
         //Group
@@ -112,20 +112,13 @@ unsigned int strGEtoInt(char *Gstr , char * Estr)
 
 }
 
-bool LoadDictionary(char	*filename)
+bool LoadDictionary(const char* filename)
     {
     FILE		*fp;
-//	unsigned int		Index, DIndex;
 
     DicElement	DElement;
 
     char		s[1024];
-    //char		s1[1024];
-   char path[100]=""; //"D:\\TCU\\Report\\DICOMDecoder QT 5.10\\";
-   strcat(path, filename);
-
-    if ( ! path )
-        return (false );
 
     fp = fopen ( filename, "r" );
     if ( ! fp )
@@ -145,12 +138,11 @@ bool LoadDictionary(char	*filename)
         DElement.IntGE =0;
         strcpy(DElement.VRType ,"UN");
         strcpy(DElement.Description, "Unknown");
-        unsigned	char	Digit;
 
         DElement.IntGE = strGEtoInt(&s[1],&s[6]); // s[1]-s[4] Gstr, s[6]-s[9]
 
        // Now scan for 'VR=" and Keyword="
-        char *p,	vType[3];
+        char *p;
         p = strstr(s, "VR=");
         if(p)
            {DElement.VRType[0] =p[4];
@@ -205,18 +197,10 @@ void SaveDictionary(char	*filename)
 FILE * pFile;
     pFile = fopen (filename,"w+");
 
-    unsigned int DicSize;
-    int GEindex;
-    int	 i;
-    char * TypeCodeTemp;
-    char * DescriptionTemp;
-    DicSize = TagDictionary.size();
-
-
-    unsigned	char	Digit;
+    unsigned int DicSize = TagDictionary.size();
 
    fprintf(pFile,"Total Dictory size: %d  \n",DicSize);
-    for(i=0;i < DicSize;i++)
+    for(unsigned int i=0; i < DicSize; i++)
     {
         fprintf(pFile,"Group Eelement: %u, VR data type: %s , VM %s , Description: %s \n", TagDictionary[i].IntGE,TagDictionary[i].VRType,TagDictionary[i].VM, TagDictionary[i].Description);
     }
@@ -240,17 +224,10 @@ int BinarySearch(unsigned int key)
 
 int FindDicElement(unsigned short g, unsigned short e )
 {
-    unsigned int DicSize;
     unsigned int Key, GEindex;
     Key =(g <<16) + e;
-    int	 i;
-    char * TypeCodeTemp;
-    char * DescriptionTemp;
-    DicSize = TagDictionary.size();
     // printf(" Size %d ", TagDictionary.size());
     GEindex=BinarySearch(Key);
     // printf("Group Eelement: %u, VR data type: %s , VM %s , Description: %s \n", TagDictionary[GEindex].IntGE,TagDictionary[GEindex].TypeCode, TagDictionary[GEindex].VM, TagDictionary[GEindex].Description );
     return GEindex;
-
-
 }

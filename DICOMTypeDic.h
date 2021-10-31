@@ -20,7 +20,7 @@ extern  vector<DicElement> TagDictionary;
 //extern vector<DicElement> TagDictionary;
 unsigned int strGEtoInt(char *Gstr , char * Estr);
 
-bool LoadDictionary(char *filename);
+bool LoadDictionary(const char *filename);
 void SaveDictionary(char *filename);
 string GetVRType(char *GE);
 //bool  FindDicElement(unsigned short g, unsigned short e, DicElement * ret );

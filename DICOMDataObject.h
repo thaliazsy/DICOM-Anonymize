@@ -140,7 +140,7 @@ void  SaveDataElement(FILE	*Retfp,  DataElement *CurElement);
 
 
 char  CheckDeanonymizationType(DataElement * DataElementP);
-bool  KeepDataElement(FILE	*Retfp,  DataElement *CurElement);
+void  KeepDataElement(FILE	*Retfp,  DataElement *CurElement);
 bool  ReplaceZeroLength(FILE	*Retfp,  DataElement *CurElement);
 bool  ReplaceWithString(FILE	*Retfp,  DataElement *CurElement, unsigned short strLength, char * strData);
 };

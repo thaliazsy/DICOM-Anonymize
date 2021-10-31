@@ -43,7 +43,6 @@ public:
 
     void createStudy(QMap<QString, QString> metadata);
     void appendToStudy(QMap<QString, QString> metadata);
-    void addToStudy(vector<DataElement> * AllElement); //20210612 add by Jack Hsiao
     QByteArray createImagingStudyJSON();
     QByteArray createPatientJSON();
 };

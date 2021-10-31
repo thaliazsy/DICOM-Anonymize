@@ -141,7 +141,7 @@ void MainWindow::on_selectBtn_clicked()
             char* retDCM = new char[byte.size()+1];
             strcpy(retDCM, byte.data());
 
-            byte = (dirPath+"/"+filename+"-part10Elements.dcm").toUtf8();
+            byte = (dirPath+"/tempPart10Elements.dcm").toUtf8();
             char* tempPart10Elements = new char[byte.size()+1];
             strcpy(tempPart10Elements, byte.data());
 

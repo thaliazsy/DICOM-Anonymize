@@ -76,7 +76,7 @@ bool DICOMDataObject:: DataToString(DataElement * DataElementP)
         S SstrData;
         ReturnData = SstrData.strData;
        if(DataLength ==0)   { // DataElementP->shortVM =0;
-                         sprintf(ReturnData,"");
+                         sprintf(ReturnData, "%s", "");
                           DataElementP->StrDataV.push_back(SstrData);
                          return true;      }
 
@@ -92,7 +92,7 @@ bool DICOMDataObject:: DataToString(DataElement * DataElementP)
         Example: A Data Element Tag of (0018,00FF) would be encoded as a series of 4 bytes in a Little-Endian Transfer Syntax as 18H,00H,FFH,00H and in a Big-Endian Transfer Syntax as 00H,18H,00H,FFH.
         Should not presented in DICOM data type? And should be reviced when we have time.
         */
-     for(i=0;i< shortVM;i++) {
+     for(short i=0;i< shortVM;i++) {
 
     /*     double ReverseDouble(double inDouble );
          float ReverseFloat(float inFloat );
@@ -176,7 +176,7 @@ bool DICOMDataObject:: DataToString(DataElement * DataElementP)
 
            }
      else if(strcmp(VRType, "OB") == 0 ||strcmp(VRType, "OW") == 0 ||strcmp(VRType, "SQ") == 0)
-          {sprintf(ReturnData,"");
+          {sprintf(ReturnData, "%s", "");
              }
 
      else {
@@ -309,7 +309,6 @@ bool DICOMDataObject::	SetElementProperities(DataElement *CurElement)
 int DICOMDataObject::	ReadDICOMPart10File()
 {
     char			s[256];
-    bool decodeRet =true;  //return value
    //	unsigned int		Offset, fileSize;
         unsigned int		Offset;
     //FILE	*fp;
@@ -337,7 +336,7 @@ int DICOMDataObject::	ReadDICOMPart10File()
     fseek(fp, Offset, SEEK_SET);
 
 
-    int MaxOffset;
+    unsigned int MaxOffset;
     MaxOffset = fileSize;
    //return DecodeDICOMObject(CurObjectIndex);
    while ( Offset < MaxOffset )
@@ -486,8 +485,6 @@ return DecodeDICOMObject(CurObjectIndex);
 int  DICOMDataObject::	DecodeDICOMObject(DICOMObjectIndex MyObjectIndex)
     //;DecodeDICOMObject(unsigned int ParentDataElementID, unsigned int DDOOffset) //unsigned int DDOOffset)
 {
-
-    char			s[256];
     bool decodeRet = true;
     int MyDDOLength;
     MyDDOLength = -1;  // error
@@ -498,10 +495,9 @@ int  DICOMDataObject::	DecodeDICOMObject(DICOMObjectIndex MyObjectIndex)
     Offset = MyObjectIndex.Offset;
     fseek(fp, Offset, SEEK_SET);
 
-    int ElementCount;
-    ElementCount =0;
-    int LastElementID;
-    int MaxOffset;
+    int ElementCount = 0;
+    int LastElementID = 0;
+    unsigned int MaxOffset;
     if(MyObjectIndex.isKnowLength)   MaxOffset =MyObjectIndex.Offset +  MyObjectIndex.Length;
     else MaxOffset = fileSize;
 
@@ -635,27 +631,24 @@ int  DICOMDataObject::	DecodeDICOMObject(DICOMObjectIndex MyObjectIndex)
 
 // ftp://dicom.nema.org/medical/DICOM/2013/output/chtml/part05/sect_7.5.html
 int  DICOMDataObject:: ParseSQElement(DataElement ParentElement)
- {bool isDefinedSQLength;
-  bool isEndOfSeqence;
+ {
+    //bool isDefinedSQLength;
   int MySQLength;
   MySQLength =-1;
-  isEndOfSeqence = false;
-   bool decodeRet = true;
   unsigned int		Offset;
 
-  int MaxOffset;
+  unsigned int MaxOffset;
   if( ParentElement.Length == 0xFFFFFFFF)
-         { isDefinedSQLength = 0; //unknow SQ Length
+         { //isDefinedSQLength = 0; //unknow SQ Length
            MaxOffset = fileSize;
          }
-  else  { isDefinedSQLength = 1;
+  else  { //isDefinedSQLength = 1;
          MaxOffset  =  ParentElement.Offset +  ParentElement.Length;
         }
 
     DataElement CurElement;
-    unsigned short tempShortInt;
     unsigned int Length;
-    void *Ptr, * GPtr, *EPtr, *VRPtr;
+    void *Ptr, * GPtr, *EPtr;
 
     GPtr = (void *) (&CurElement.Group);
     EPtr = (void *) (&CurElement.Element);
@@ -735,9 +728,9 @@ char  DICOMDataObject:: CheckDeanonymizationType(DataElement * DataElementP)
     else return 'D';
 
     }
-bool  DICOMDataObject:: KeepDataElement(FILE *Retfp,  DataElement *CurElement)
-   {
-    void *Ptr, * GPtr, *EPtr, *VRPtr;
+void  DICOMDataObject:: KeepDataElement(FILE *Retfp,  DataElement *CurElement)
+{
+    void *GPtr, *EPtr, *VRPtr;
 
     GPtr = (void *) (&CurElement->Group);
     EPtr = (void *) (&CurElement->Element);
@@ -746,7 +739,7 @@ bool  DICOMDataObject:: KeepDataElement(FILE *Retfp,  DataElement *CurElement)
     fwrite (EPtr, 2, 1, Retfp);
     // only support explict VR
     fwrite (VRPtr, 2, 1, Retfp);
-   }
+}
 
 unsigned short hex2int(char *hex) {
     unsigned short val = 0;
@@ -764,9 +757,7 @@ unsigned short hex2int(char *hex) {
 }
 void DICOMDataObject::SavePart10Header(FILE	*Retfp)
 {   unsigned char  hdata[160];
-    void * Data;
-
-    void * p;
+    void* Data = nullptr;
 
     int i, size;;
     for(i=0;i<128;i++) hdata[i]=0;
@@ -784,13 +775,13 @@ void DICOMDataObject::SavePart10Header(FILE	*Retfp)
 
     QString strG,strE, strVR, strValue,strType;
     unsigned short g, e;
-    int length;
+    int length = 0;
     QByteArray baVR,baData;//= str1.toLocal8Bit();
     char * vr;
    // unsigned int uintData, Length;
 
     char charData[256]; // max 256
-    char vrType[3];
+    //char vrType[3];
     size = jsonTemp->rootJsonAarray.size();
   //  qDebug()<< size;
     for(i=0; i<size ;i++)
@@ -820,19 +811,21 @@ void DICOMDataObject::SavePart10Header(FILE	*Retfp)
            {
 
             if(e ==0x0001)
-                 {vrType[0] ='O';  vrType[1] ='B';  vrType[2] =0;
-                  charData[0] =0; charData[1]=1;
-                  length =2;
-                  Data = (void *)charData;
-                  }
+            {
+                //vrType[0] ='O';  vrType[1] ='B';  vrType[2] =0;
+                charData[0] =0; charData[1]=1;
+                length =2;
+                Data = (void *)charData;
+            }
             else {
-                  strType = jsonTemp->rootJsonAarray.at(i).toObject().value("type").toString();
-                  if(strType == "Replace")
-                       {baData =  strValue.toLocal8Bit();
-                        Data = baData.data();
-                        length = strValue.length();
-                       }
-                 }
+                strType = jsonTemp->rootJsonAarray.at(i).toObject().value("type").toString();
+                if(strType == "Replace")
+                {
+                    baData =  strValue.toLocal8Bit();
+                    Data = baData.data();
+                    length = strValue.length();
+                }
+            }
             SaveDataElement(tempfp, g, e, vr,length, Data );
            }
         }
@@ -1145,6 +1138,7 @@ bool  DICOMDataObject:: SaveDICOM()
     }
 
     fclose(Retfp);
+    return true;
 }
 bool  DICOMDataObject::Deanonymization(char * FileName)
    {
@@ -1189,6 +1183,7 @@ bool  DICOMDataObject::Deanonymization(char * FileName)
                }
        }
       fclose(Retfp);
+      return true;
 }
 
 
@@ -1201,17 +1196,15 @@ bool DICOMDataObject::DecodeRetToXML(char * FileName)
     int i,TotalElement;
     TotalElement = AllElement.size();
 
-
-
     int MyObjectID;
-    char EndOfSequence;
+    //char EndOfSequence;
     fprintf(Retfp, "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n");
 
     fprintf(Retfp, "<NativeDicomModel>\n");
     for(i=0;i< TotalElement;i ++)
         {MyObjectID = AllElement[i].ParentDICOMObjectID;
-         if(AllObject[ MyObjectID].IsEndOfSeqence == true) EndOfSequence ='T';
-         else EndOfSequence ='F';
+         //if(AllObject[ MyObjectID].IsEndOfSeqence == true) EndOfSequence ='T';
+         //else EndOfSequence ='F';
         if(AllElement[i].IsBeginOfObject == true)
             {fprintf(Retfp, "<Item  number=\"%d\"   >\n",AllObject[ MyObjectID].ItemNumber );  //<Item  Number=\"1\">
         //fprintf(Retfp, "\n<Item  Number=\"%d\" POis=\"%d\"  Offset=\"%d\"  Length=\"%d\" EndOfSQ=\"%c\"  >\n",AllObject[ MyObjectID].ItemNumber,MyObjectID, AllObject[ MyObjectID].Offset,AllObject[ MyObjectID].Length,EndOfSequence  );  //<Item  Number=\"1\">
@@ -1224,11 +1217,10 @@ bool DICOMDataObject::DecodeRetToXML(char * FileName)
         fprintf(Retfp, "vr= \"%s\" keyword= \"%s\" ",AllElement[i].VRType,AllElement[i].Description);
         fprintf(Retfp, ">");
         char VRType[3];
-        unsigned int j;
-        for(j=0;j<3;j++)  VRType[j] =AllElement[i].VRType[j];
+        for(unsigned int j=0;j<3;j++)  VRType[j] =AllElement[i].VRType[j];
         if(AllElement[i].Length >0)
-            {int j;
-            for(j =0; j<AllElement[i].StrDataV.size();j++)
+            {
+            for(unsigned int j =0; j<AllElement[i].StrDataV.size();j++)
                {
             if(!(strcmp(VRType, "OB") == 0 || strcmp(VRType, "OW") == 0 || strcmp(VRType, "OF") ==0|| strcmp(VRType, "SQ")==0 )) // || strcmp(VRType, "UT")==0 ))
                   {//if(strcmp(VRType, "PN") != 0)
@@ -1244,7 +1236,7 @@ bool DICOMDataObject::DecodeRetToXML(char * FileName)
              }
         int TheEelementSQEndingCount;
         TheEelementSQEndingCount =AllElement[i].SQEndings.size();
-        for(j=0;j<TheEelementSQEndingCount ;j++)
+        for(int j=0;j<TheEelementSQEndingCount ;j++)
             {fprintf(Retfp, "</DicomAttribute>");
              int SQElementID;
              SQElementID = AllElement[i].SQEndings[j];
@@ -1253,6 +1245,7 @@ bool DICOMDataObject::DecodeRetToXML(char * FileName)
         }
     fprintf(Retfp, "</NativeDicomModel>");
     fclose(Retfp);
+    return true;
 }
 
 bool DICOMDataObject::DecodeSRToSVG(char * FileName)
@@ -1263,8 +1256,8 @@ bool DICOMDataObject::DecodeSRToSVG(char * FileName)
         return false;
     int i,TotalElement;
     TotalElement = AllElement.size();
-    int MyObjectID;
-    char EndOfSequence;
+    //int MyObjectID;
+    //char EndOfSequence;
     void		*Data;
     float FL;
     int SL;
@@ -1280,8 +1273,8 @@ bool DICOMDataObject::DecodeSRToSVG(char * FileName)
         fprintf(Retfp, "vr= \"%s\" keyword= \"%s\" ",AllElement[i].VRType,AllElement[i].Description);
         fprintf(Retfp, ">\n");
         if(strcmp(AllElement[i].VRType, "UL") == 0)
-           { int j;
-           for(j=0;j <AllElement[i].Length; j= j+4)
+           {
+           for(unsigned int j=0;j <AllElement[i].Length; j= j+4)
                { Data =(void*)((char*) AllElement[i].Data + j);
                 UL=(*((unsigned int *) Data));
                 if(IsLittleEanian == false)  UL = ReverseUnsignedInt(UL);
@@ -1299,9 +1292,9 @@ bool DICOMDataObject::DecodeSRToSVG(char * FileName)
         fprintf(Retfp, "vr= \"%s\" keyword= \"%s\" ",AllElement[i].VRType,AllElement[i].Description);
         fprintf(Retfp, ">\n");
         if(strcmp(AllElement[i].VRType, "FL") == 0)
-           { int j;
+           {
            fprintf(Retfp,"<polyline points=\"");
-           for(j=0;j <AllElement[i].Length; j= j+4)
+           for(unsigned int j=0; j <AllElement[i].Length; j+=4)
                { Data =(void*)((char*) AllElement[i].Data + j);
                 FL=(*((float *) Data));
                 if(IsLittleEanian == false)  FL = ReverseFloat(FL );
@@ -1318,4 +1311,5 @@ bool DICOMDataObject::DecodeSRToSVG(char * FileName)
        }
     fprintf(Retfp, "</SVG>");
     fclose(Retfp);
+    return true;
 }

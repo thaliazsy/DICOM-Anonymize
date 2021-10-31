@@ -8,11 +8,6 @@
 #include <QEventLoop>
 
 #include "dicomheader.h"   //20210612 add by Jack Hsiao
-//20210612 add by Jack Hsiao
-void ImagingStudy::addToStudy(vector<DataElement> * AllElement)
-{
-
-}
 
 ImagingStudy::ImagingStudy()
 {
