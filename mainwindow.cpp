@@ -208,9 +208,13 @@ void MainWindow::on_selectBtn_clicked()
             char* retDCM = new char[byte.size()+1];
             strcpy(retDCM, byte.data());
 
+            byte = (dirPath+"/"+filename+"-part10Elements.dcm").toUtf8();
+            char* tempPart10Elements = new char[byte.size()+1];
+            strcpy(tempPart10Elements, byte.data());
+
             //char* srcDCM = (filename+".dcm").toUtf8().data();  //"D:\\ttt\\IM-0001-0070.DCM";
             //char* retXML = (filename+".xml").toUtf8().data();  //"D:\\ttt\\IM-0001-0070.xml";
-            char tempPart10Elements[] = "D:\\ttt\\temp10EUS2.dcm";
+            //char tempPart10Elements[] = "D:\\ttt\\temp10EUS2.dcm";
 
             // retDCM 為匿名的 DICOM 檔，或可放在目前目錄的子目錄，如 D:\\ttt\\did\mo.dcm
             //char* retDCM = (filename+"-anon.dcm").toUtf8().data();   //"D:\\ttt\\IM-0001-0070-anon.dcm";
